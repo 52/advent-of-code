@@ -1,5 +1,8 @@
 [workspace]
-members = ["aoc-1"]
+members = [
+    "day-1",
+    "day-2"
+]
 
 [workspace.package]
 version = "1.0.0"
