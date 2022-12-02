@@ -1,0 +1,7 @@
+[workspace]
+members = ["aoc-1"]
+
+[workspace.package]
+version = "1.0.0"
+authors = ["Max <max@trustmachines.co>"]
+description = "Advent of Code - 2022 in Rust"
