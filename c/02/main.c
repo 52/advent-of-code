@@ -25,11 +25,22 @@ int a(FILE* file) {
     int x = NORMALIZE(buff[0]);
     int y = NORMALIZE(buff[2]);
 
-    if (x == -1 || y == -1) {
-      continue;
-    }
+    max += score(x, y);
+  }
 
-    max = max + score(x, y);
+  return max;
+}
+
+int b(FILE* file) {
+  char buff[256];
+  int map[3] = {2, 3, 1};
+  int max = 0;
+
+  while (fgets(buff, sizeof(buff), file)) {
+    int x = NORMALIZE(buff[0]);
+    int y = NORMALIZE(buff[2]);
+
+    max += score(x, (x + map[y]) % 3);
   }
 
   return max;
@@ -41,7 +52,7 @@ int main(int argc, char* argv[]) {
 
   printf("Part 1 Solution: %d\n", a(file));
   rewind(file);
-
+  printf("Part 2 Solution: %d\n", b(file));
   fclose(file);
   exit(EXIT_SUCCESS);
 }

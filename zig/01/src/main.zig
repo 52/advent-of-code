@@ -1,23 +1,29 @@
 const std = @import("std");
+const File = std.fs.File;
 
 pub fn main() !void {
     const stdout = std.io.getStdOut().writer();
-    try stdout.print("Part 1 Solution:: {}\n", .{try a()});
-    try stdout.print("Part 2 Solution:: {}\n", .{try b()});
-}
 
-fn a() !i32 {
-    var file = try std.fs.cwd().openFile("input.txt", .{});
+    var file = std.fs.cwd().openFile("input.txt", .{}) catch |err| {
+        try stdout.print("Error opening file: {}\n", .{err});
+        return;
+    };
+
     defer file.close();
 
+    try stdout.print("Part 1 Solution:: {}\n", .{try a(file)});
+    try file.seekTo(0);
+    try stdout.print("Part 2 Solution:: {}\n", .{try b(file)});
+}
+
+fn a(file: File) !i32 {
     var _reader = std.io.bufferedReader(file.reader());
-    var reader = _reader.reader();
     var buf: [1024]u8 = undefined;
 
     var max: i32 = 0;
     var curr: i32 = 0;
 
-    while (try reader.readUntilDelimiterOrEof(&buf, '\n')) |line| {
+    while (try _reader.reader().readUntilDelimiterOrEof(&buf, '\n')) |line| {
         if (line.len == 0) {
             max = if (curr > max) curr else max;
             curr = 0;
@@ -31,18 +37,14 @@ fn a() !i32 {
     return max;
 }
 
-fn b() !i32 {
-    var file = try std.fs.cwd().openFile("input.txt", .{});
-    defer file.close();
-
+fn b(file: File) !i32 {
     var _reader = std.io.bufferedReader(file.reader());
-    var reader = _reader.reader();
     var buf: [1024]u8 = undefined;
 
     var map = [3]i32{ 0, 0, 0 };
     var curr: i32 = 0;
 
-    while (try reader.readUntilDelimiterOrEof(&buf, '\n')) |line| {
+    while (try _reader.reader().readUntilDelimiterOrEof(&buf, '\n')) |line| {
         if (line.len == 0) {
             var p: usize = 0;
             for (map) |_, idx| {
