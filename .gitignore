@@ -1,1 +1,6 @@
-/target
+# Editor metadata
+.vscode
+
+# Build outputs
+out
+target
