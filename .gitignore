@@ -4,3 +4,5 @@
 # Build outputs
 out
 target
+zig-cache
+zig-out
