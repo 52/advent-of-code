@@ -1,7 +1,7 @@
 use std::fs::read_to_string;
 
 fn main() {
-    let aoc = AOC::new(read_to_string("./day-1/input.txt").unwrap());
+    let aoc = AOC::new(read_to_string("./01/input.txt").unwrap());
     println!("Part 1: {}", aoc.part_one());
     println!("Part 2: {}", aoc.part_two());
 }
@@ -58,13 +58,13 @@ mod day_1_tests {
 
     #[test]
     fn test_part_one() {
-        let aoc = AOC::new(read_to_string("../day-1/input-test.txt").unwrap());
+        let aoc = AOC::new(read_to_string("../01/input-test.txt").unwrap());
         assert_eq!(aoc.part_one(), 24000);
     }
 
     #[test]
     fn test_part_two() {
-        let aoc = AOC::new(read_to_string("../day-1/input-test.txt").unwrap());
+        let aoc = AOC::new(read_to_string("../01/input-test.txt").unwrap());
         assert_eq!(aoc.part_two(), 45000);
     }
 }

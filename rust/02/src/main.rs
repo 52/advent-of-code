@@ -2,7 +2,7 @@ use std::fs::read_to_string;
 use std::{cmp::Ordering, str::FromStr};
 
 fn main() {
-    let aoc = AOC::new(read_to_string("./day-2/input.txt").unwrap());
+    let aoc = AOC::new(read_to_string("./02/input.txt").unwrap());
     println!("Part 1: {}", aoc.part_one());
     println!("Part 2: {}", aoc.part_two());
 }
@@ -113,13 +113,13 @@ mod day_2_tests {
 
     #[test]
     fn test_part_one() {
-        let aoc = AOC::new(read_to_string("../day-2/input-test.txt").unwrap());
+        let aoc = AOC::new(read_to_string("../02/input-test.txt").unwrap());
         assert_eq!(aoc.part_one(), 15);
     }
 
     #[test]
     fn test_part_two() {
-        let aoc = AOC::new(read_to_string("../day-2/input-test.txt").unwrap());
+        let aoc = AOC::new(read_to_string("../02/input-test.txt").unwrap());
         assert_eq!(aoc.part_two(), 12);
     }
 }
