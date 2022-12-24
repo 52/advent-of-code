@@ -1,20 +1,18 @@
 const std = @import("std");
 const testing = std.testing;
 
+const data = @embedFile("input");
+
 const Solution = struct {
-    file: std.fs.File,
+    file: std.mem.SplitIterator(u8),
 
     fn init() !@This() {
-        var file = try std.fs.cwd().openFile("input.txt", .{});
+        var file = std.mem.split(u8, data, "\n");
         return Solution{ .file = file };
     }
 
-    fn deinit(self: @This()) void {
-        self.file.close();
-    }
-
-    fn rewind(self: @This()) !void {
-        try self.file.seekTo(0);
+    fn rewind(self: *@This()) void {
+        self.file.reset();
     }
 
     fn normalize(_: @This(), x: u8) !u8 {
@@ -36,12 +34,12 @@ const Solution = struct {
         return map[x][y];
     }
 
-    fn a(self: @This()) !i32 {
-        var _reader = std.io.bufferedReader(self.file.reader());
-        var buf: [1024]u8 = undefined;
+    fn a(self: *@This()) !i32 {
         var max: i32 = 0;
 
-        while (try _reader.reader().readUntilDelimiterOrEof(&buf, '\n')) |line| {
+        while (self.file.next()) |line| {
+            if (line.len == 0) continue;
+
             var x = try self.normalize(line[0]);
             var y = try self.normalize(line[2]);
 
@@ -51,13 +49,13 @@ const Solution = struct {
         return max;
     }
 
-    fn b(self: @This()) !i32 {
-        var _reader = std.io.bufferedReader(self.file.reader());
+    fn b(self: *@This()) !i32 {
         var map: [3]u8 = .{ 2, 3, 1 };
-        var buf: [1024]u8 = undefined;
         var max: i32 = 0;
 
-        while (try _reader.reader().readUntilDelimiterOrEof(&buf, '\n')) |line| {
+        while (self.file.next()) |line| {
+            if (line.len == 0) continue;
+
             var x = try self.normalize(line[0]);
             var y = try self.normalize(line[2]);
 
@@ -71,10 +69,9 @@ const Solution = struct {
 test {
     std.testing.log_level = .debug;
     var solution = try Solution.init();
-    defer solution.deinit();
 
     var a = try solution.a();
-    try solution.rewind();
+    solution.rewind();
     var b = try solution.b();
 
     try testing.expectEqual(a, 12535);
