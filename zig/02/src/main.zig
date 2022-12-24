@@ -1,24 +1,85 @@
 const std = @import("std");
+const testing = std.testing;
 
-pub fn main() !void {
-    // Prints to stderr (it's a shortcut based on `std.io.getStdErr()`)
-    std.debug.print("All your {s} are belong to us.\n", .{"codebase"});
+const Solution = struct {
+    file: std.fs.File,
 
-    // stdout is for the actual output of your application, for example if you
-    // are implementing gzip, then only the compressed bytes should be sent to
-    // stdout, not any debugging messages.
-    const stdout_file = std.io.getStdOut().writer();
-    var bw = std.io.bufferedWriter(stdout_file);
-    const stdout = bw.writer();
+    fn init() !@This() {
+        var file = try std.fs.cwd().openFile("input.txt", .{});
+        return Solution{ .file = file };
+    }
 
-    try stdout.print("Run `zig build test` to run the tests.\n", .{});
+    fn deinit(self: @This()) void {
+        self.file.close();
+    }
 
-    try bw.flush(); // don't forget to flush!
-}
+    fn rewind(self: @This()) !void {
+        try self.file.seekTo(0);
+    }
 
-test "simple test" {
-    var list = std.ArrayList(i32).init(std.testing.allocator);
-    defer list.deinit(); // try commenting this out and see if zig detects the memory leak!
-    try list.append(42);
-    try std.testing.expectEqual(@as(i32, 42), list.pop());
+    fn normalize(_: @This(), x: u8) !u8 {
+        var s: u8 = switch (x) {
+            'A', 'X' => 0,
+            'B', 'Y' => 1,
+            'C', 'Z' => 2,
+            else => @panic("Error: Received invalid input."),
+        };
+        return s;
+    }
+
+    fn score(_: @This(), x: u8, y: u8) i32 {
+        var map: [3][3]u8 = .{
+            .{ 1 + 3, 2 + 6, 3 + 0 },
+            .{ 1 + 0, 2 + 3, 3 + 6 },
+            .{ 1 + 6, 2 + 0, 3 + 3 },
+        };
+        return map[x][y];
+    }
+
+    fn a(self: @This()) !i32 {
+        var _reader = std.io.bufferedReader(self.file.reader());
+        var buf: [1024]u8 = undefined;
+        var max: i32 = 0;
+
+        while (try _reader.reader().readUntilDelimiterOrEof(&buf, '\n')) |line| {
+            var x = try self.normalize(line[0]);
+            var y = try self.normalize(line[2]);
+
+            max += self.score(x, y);
+        }
+
+        return max;
+    }
+
+    fn b(self: @This()) !i32 {
+        var _reader = std.io.bufferedReader(self.file.reader());
+        var map: [3]u8 = .{ 2, 3, 1 };
+        var buf: [1024]u8 = undefined;
+        var max: i32 = 0;
+
+        while (try _reader.reader().readUntilDelimiterOrEof(&buf, '\n')) |line| {
+            var x = try self.normalize(line[0]);
+            var y = try self.normalize(line[2]);
+
+            max += self.score(x, (x + map[y]) % 3);
+        }
+
+        return max;
+    }
+};
+
+test {
+    std.testing.log_level = .debug;
+    var solution = try Solution.init();
+    defer solution.deinit();
+
+    var a = try solution.a();
+    try solution.rewind();
+    var b = try solution.b();
+
+    try testing.expectEqual(a, 12535);
+    try testing.expectEqual(b, 15457);
+
+    std.debug.print("\nSolution 1: {}\n", .{a});
+    std.debug.print("Solution 2: {}\n", .{b});
 }

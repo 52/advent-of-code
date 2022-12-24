@@ -1,71 +1,89 @@
 const std = @import("std");
-const File = std.fs.File;
+const testing = std.testing;
 
-pub fn main() !void {
-    const stdout = std.io.getStdOut().writer();
+const Solution = struct {
+    file: std.fs.File,
 
-    var file = std.fs.cwd().openFile("input.txt", .{}) catch |err| {
-        try stdout.print("Error opening file: {}\n", .{err});
-        return;
-    };
-
-    defer file.close();
-
-    try stdout.print("Part 1 Solution:: {}\n", .{try a(file)});
-    try file.seekTo(0);
-    try stdout.print("Part 2 Solution:: {}\n", .{try b(file)});
-}
-
-fn a(file: File) !i32 {
-    var _reader = std.io.bufferedReader(file.reader());
-    var buf: [1024]u8 = undefined;
-
-    var max: i32 = 0;
-    var curr: i32 = 0;
-
-    while (try _reader.reader().readUntilDelimiterOrEof(&buf, '\n')) |line| {
-        if (line.len == 0) {
-            max = if (curr > max) curr else max;
-            curr = 0;
-            continue;
-        }
-
-        var i = try std.fmt.parseInt(i32, line, 10);
-        curr = curr + i;
+    fn init() !@This() {
+        var file = try std.fs.cwd().openFile("input.txt", .{});
+        return Solution{ .file = file };
     }
 
-    return max;
-}
+    fn deinit(self: @This()) void {
+        self.file.close();
+    }
 
-fn b(file: File) !i32 {
-    var _reader = std.io.bufferedReader(file.reader());
-    var buf: [1024]u8 = undefined;
+    fn rewind(self: @This()) !void {
+        try self.file.seekTo(0);
+    }
 
-    var map = [3]i32{ 0, 0, 0 };
-    var curr: i32 = 0;
+    fn sum(arr: [3]i32) i32 {
+        var _sum: i32 = 0;
+        for (arr) |i| _sum = _sum + i;
+        return _sum;
+    }
 
-    while (try _reader.reader().readUntilDelimiterOrEof(&buf, '\n')) |line| {
-        if (line.len == 0) {
-            var p: usize = 0;
-            for (map) |_, idx| {
-                if (map[idx] < map[p]) p = idx;
+    fn a(self: @This()) !i32 {
+        var _reader = std.io.bufferedReader(self.file.reader());
+        var buf: [1024]u8 = undefined;
+
+        var max: i32 = 0;
+        var curr: i32 = 0;
+
+        while (try _reader.reader().readUntilDelimiterOrEof(&buf, '\n')) |line| {
+            if (line.len == 0) {
+                max = if (curr > max) curr else max;
+                curr = 0;
+                continue;
             }
 
-            if (curr > map[p]) map[p] = curr;
-
-            curr = 0;
-            continue;
+            var i = try std.fmt.parseInt(i32, line, 10);
+            curr = curr + i;
         }
 
-        var i = try std.fmt.parseInt(i32, line, 10);
-        curr = curr + i;
+        return max;
     }
 
-    return sum(map);
-}
+    fn b(self: @This()) !i32 {
+        var _reader = std.io.bufferedReader(self.file.reader());
+        var buf: [1024]u8 = undefined;
 
-fn sum(arr: [3]i32) i32 {
-    var _sum: i32 = 0;
-    for (arr) |i| _sum = _sum + i;
-    return _sum;
+        var map = [3]i32{ 0, 0, 0 };
+        var curr: i32 = 0;
+
+        while (try _reader.reader().readUntilDelimiterOrEof(&buf, '\n')) |line| {
+            if (line.len == 0) {
+                var p: usize = 0;
+                for (map) |_, idx| {
+                    if (map[idx] < map[p]) p = idx;
+                }
+
+                if (curr > map[p]) map[p] = curr;
+
+                curr = 0;
+                continue;
+            }
+
+            var i = try std.fmt.parseInt(i32, line, 10);
+            curr = curr + i;
+        }
+
+        return sum(map);
+    }
+};
+
+test {
+    std.testing.log_level = .debug;
+    var solution = try Solution.init();
+    defer solution.deinit();
+
+    var a = try solution.a();
+    try solution.rewind();
+    var b = try solution.b();
+
+    try testing.expectEqual(a, 70720);
+    try testing.expectEqual(b, 207148);
+
+    std.debug.print("\nSolution 1: {}\n", .{a});
+    std.debug.print("Solution 2: {}\n", .{b});
 }
