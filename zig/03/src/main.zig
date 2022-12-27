@@ -78,6 +78,9 @@ test {
     solution.rewind();
     var b = try solution.b();
 
+    try testing.expectEqual(a, 7908);
+    try testing.expectEqual(b, 2838);
+
     std.debug.print("\nSolution 1: {}\n", .{a});
     std.debug.print("Solution 2: {}\n", .{b});
 }
