@@ -8,7 +8,6 @@ const Solution = struct {
 
     fn init() !@This() {
         var file = std.mem.tokenize(u8, data, "\n");
-
         return Solution{ .file = file };
     }
 
